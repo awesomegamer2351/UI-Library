@@ -2305,18 +2305,18 @@ local Library do
 
                 Library:MakeBlurred(Items["LeftTabs"], Window)
 
-                -- ========== HEADER SECTION (FIXED: no icon, larger bold text, clean separator) ==========
+                -- ========== HEADER SECTION (centered, lighter faded separator) ==========
 if Data.HeaderName then
     Items["Header"] = Instances:Create("Frame", {
         Parent = Items["LeftTabs"].Instance,
         Name = "Header",
         BackgroundTransparency = 1,
-        Size = UDim2New(1, 0, 0, 70),      -- enough height
+        Size = UDim2New(1, 0, 0, 80),      -- a bit taller to allow perfect centering
         LayoutOrder = 0,
         ZIndex = 2
     })
 
-    -- Title: larger, bold, no icon
+    -- Title: perfectly centered in the Header frame
     Items["HeaderTitle"] = Instances:Create("TextLabel", {
         Parent = Items["Header"].Instance,
         Name = "Title",
@@ -2324,37 +2324,43 @@ if Data.HeaderName then
         Text = Data.HeaderName,
         TextColor3 = FromRGB(240, 240, 240),
         BackgroundTransparency = 1,
-        Size = UDim2New(1, -24, 0, 36),    -- tall enough for larger text
-        Position = UDim2New(0, 12, 0.5, -18),
-        AnchorPoint = Vector2New(0, 0.5),
+        Size = UDim2New(1, -24, 1, 0),     -- fill entire width minus padding, full height
+        Position = UDim2New(0, 12, 0, 0),  -- left padding only, Y centered by TextYAlignment
+        AnchorPoint = Vector2New(0, 0),
         TextXAlignment = Enum.TextXAlignment.Left,
-        TextYAlignment = Enum.TextYAlignment.Center,
-        TextSize = 22,                     -- larger than before (was 18)
+        TextYAlignment = Enum.TextYAlignment.Center,  -- auto centers vertically
+        TextSize = 22,
         TextScaled = false,
-        Font = Enum.Font.GothamBold,       -- explicitly bold
+        Font = Enum.Font.GothamBold,
         ZIndex = 2
     })
     Items["HeaderTitle"]:AddToTheme({TextColor3 = "Text"})
 
-    -- Separator: uses UI's darkest color, semi‑transparent, rounded, no outline, closer
+    -- Separator: lighter, transparent, with faded edges (gradient transparency)
     Items["HeaderSeparator"] = Instances:Create("Frame", {
         Parent = Items["Header"].Instance,
         Name = "Separator",
-        BackgroundColor3 = FromRGB(0, 0, 0),   -- will be replaced by theme
-        BackgroundTransparency = 0.65,         -- see‑through
-        Size = UDim2New(1, -24, 0, 2),         -- thin, with side margins
-        Position = UDim2New(0, 12, 1, -6),     -- closer to text (was -12, then -4)
+        BackgroundColor3 = FromRGB(255, 255, 255),   -- white base, will be tinted by theme
+        BackgroundTransparency = 0.85,               -- very see‑through
+        Size = UDim2New(1, -24, 0, 2),
+        Position = UDim2New(0, 12, 1, -8),           -- 8px above the bottom of header
         AnchorPoint = Vector2New(0, 1),
-        BorderSizePixel = 0,                   -- no border
+        BorderSizePixel = 0,
         ZIndex = 2
     })
-    -- Rounded corners
-    local sepCorner = Instance.new("UICorner")
-    sepCorner.CornerRadius = UDim.new(0, 4)
-    sepCorner.Parent = Items["HeaderSeparator"].Instance
+    -- Add a gradient that fades the ends to transparent (creates "faded edges")
+    local sepGradient = Instance.new("UIGradient")
+    sepGradient.Transparency = NumberSequence.new({
+        NumberSequenceKeypoint.new(0, 1),      -- fully transparent at left edge
+        NumberSequenceKeypoint.new(0.15, 0),   -- opaque at 15%
+        NumberSequenceKeypoint.new(0.85, 0),   -- opaque until 85%
+        NumberSequenceKeypoint.new(1, 1)       -- transparent at right edge
+    })
+    sepGradient.Rotation = 0
+    sepGradient.Parent = Items["HeaderSeparator"].Instance
 
-    -- Apply the darkest UI background color (so it blends)
-    Items["HeaderSeparator"]:AddToTheme({BackgroundColor3 = "Background"})
+    -- Apply a light theme color (e.g., "Outline" or "Text" with low opacity)
+    Items["HeaderSeparator"]:AddToTheme({BackgroundColor3 = "Outline"})
 end
 -- =======================================
 												
