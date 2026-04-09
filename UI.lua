@@ -2305,71 +2305,73 @@ local Library do
 
                 Library:MakeBlurred(Items["LeftTabs"], Window)
 
-          -- ========== HEADER SECTION (gradient separator with fade, centered text) ==========
-if Data.HeaderName then
-    Items["Header"] = Instances:Create("Frame", {
-        Parent = Items["LeftTabs"].Instance,
-        Name = "Header",
-        BackgroundTransparency = 1,
-        Size = UDim2New(1, 0, 0, 70),
-        LayoutOrder = 0,
-        ZIndex = 2
-    })
+                -- ========== HEADER SECTION (fixed: no icon, centered larger text, clean separator) ==========
+                if Data.HeaderName then
+                    Items["Header"] = Instances:Create("Frame", {
+                        Parent = Items["LeftTabs"].Instance,
+                        Name = "Header",
+                        BackgroundTransparency = 1,
+                        Size = UDim2New(1, 0, 0, 75),      -- enough height for centered text
+                        LayoutOrder = 0,
+                        ZIndex = 2
+                    })
 
-    -- Title: perfectly centered vertically
-    Items["HeaderTitle"] = Instances:Create("TextLabel", {
-        Parent = Items["Header"].Instance,
-        Name = "Title",
-        FontFace = Library.Font,
-        Text = Data.HeaderName,
-        TextColor3 = FromRGB(240, 240, 240),
-        BackgroundTransparency = 1,
-        Size = UDim2New(1, -24, 1, 0),
-        Position = UDim2New(0, 12, 0, 0),
-        TextXAlignment = Enum.TextXAlignment.Left,
-        TextYAlignment = Enum.TextYAlignment.Center,
-        TextSize = 22,
-        Font = Enum.Font.GothamBold,
-        ZIndex = 2
-    })
-    Items["HeaderTitle"]:AddToTheme({TextColor3 = "Text"})
+                    -- Title: perfectly centered, larger, bold
+                    Items["HeaderTitle"] = Instances:Create("TextLabel", {
+                        Parent = Items["Header"].Instance,
+                        Name = "Title",
+                        FontFace = Library.Font,
+                        Text = Data.HeaderName,
+                        TextColor3 = FromRGB(240, 240, 240),
+                        BackgroundTransparency = 1,
+                        Size = UDim2New(1, -24, 1, 0),     -- fills entire header height
+                        Position = UDim2New(0, 12, 0, 0),
+                        TextXAlignment = Enum.TextXAlignment.Left,
+                        TextYAlignment = Enum.TextYAlignment.Center,
+                        TextSize = 24,                     -- larger than before
+                        Font = Enum.Font.GothamBold,
+                        ZIndex = 2
+                    })
+                    Items["HeaderTitle"]:AddToTheme({TextColor3 = "Text"})
 
-    -- Separator: uses accent gradient, fades at edges, constant thickness
-    Items["HeaderSeparator"] = Instances:Create("Frame", {
-        Parent = Items["Header"].Instance,
-        Name = "Separator",
-        BackgroundColor3 = FromRGB(255, 255, 255),
-        BackgroundTransparency = 0,
-        Size = UDim2New(1, -24, 0, 2),
-        Position = UDim2New(0, 12, 1, -10),
-        AnchorPoint = Vector2New(0, 1),
-        BorderSizePixel = 0,
-        ZIndex = 2
-    })
+                    -- Separator: uses accent gradient, NO outline, rounded, semi-transparent
+                    Items["HeaderSeparator"] = Instances:Create("Frame", {
+                        Parent = Items["Header"].Instance,
+                        Name = "Separator",
+                        BackgroundColor3 = FromRGB(255, 255, 255),
+                        BackgroundTransparency = 0.4,       -- semi‑transparent
+                        Size = UDim2New(1, -24, 0, 2),
+                        Position = UDim2New(0, 12, 1, -8),  -- closer to text
+                        AnchorPoint = Vector2New(0, 1),
+                        BorderSizePixel = 0,                -- NO outline
+                        ZIndex = 2
+                    })
 
-    -- Gradient that fades at edges (transparent on ends, solid accent in middle)
-    local sepGradient = Instance.new("UIGradient")
-    sepGradient.Transparency = NumberSequence.new({
-        NumberSequenceKeypoint.new(0, 1),      -- fully transparent at left edge
-        NumberSequenceKeypoint.new(0.2, 0),    -- starts becoming opaque
-        NumberSequenceKeypoint.new(0.5, 0),    -- fully opaque in middle
-        NumberSequenceKeypoint.new(0.8, 0),    -- starts fading
-        NumberSequenceKeypoint.new(1, 1)       -- fully transparent at right edge
-    })
-    -- Use the accent gradient colors (left to right)
-    sepGradient.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0, Library.Theme.AccentGradient),
-        ColorSequenceKeypoint.new(1, Library.Theme.Accent)
-    })
-    sepGradient.Rotation = 0
-    sepGradient.Parent = Items["HeaderSeparator"].Instance
+                    -- Gradient that fades at edges (transparent on ends, accent in middle)
+                    local sepGradient = Instance.new("UIGradient")
+                    sepGradient.Transparency = NumberSequence.new({
+                        NumberSequenceKeypoint.new(0, 1),      -- transparent left edge
+                        NumberSequenceKeypoint.new(0.2, 0),    -- fade in
+                        NumberSequenceKeypoint.new(0.8, 0),    -- fade out
+                        NumberSequenceKeypoint.new(1, 1)       -- transparent right edge
+                    })
+                    -- Use your theme's accent colors (left to right)
+                    sepGradient.Color = ColorSequence.new({
+                        ColorSequenceKeypoint.new(0, Library.Theme.AccentGradient),
+                        ColorSequenceKeypoint.new(1, Library.Theme.Accent)
+                    })
+                    sepGradient.Rotation = 0
+                    sepGradient.Parent = Items["HeaderSeparator"].Instance
 
-    -- Rounded corners
-    local sepCorner = Instance.new("UICorner")
-    sepCorner.CornerRadius = UDim.new(0, 4)
-    sepCorner.Parent = Items["HeaderSeparator"].Instance
-end
--- =======================================
+                    -- Rounded corners
+                    local sepCorner = Instance.new("UICorner")
+                    sepCorner.CornerRadius = UDim.new(0, 4)
+                    sepCorner.Parent = Items["HeaderSeparator"].Instance
+
+                    -- Store gradient for later updates (when accent colors change)
+                    Items["HeaderSeparatorGradient"] = sepGradient
+                end
+                -- =======================================
 												
                 local Gui = Items["MainFrame"].Instance
 
@@ -3215,6 +3217,13 @@ end
                     Callback = function(Color)
                         Library.Theme.Accent = Color
                         Library:ChangeTheme("Accent", Color)
+                        -- Update header separator gradient (right side)
+                        if Items["HeaderSeparatorGradient"] then
+                            Items["HeaderSeparatorGradient"].Color = ColorSequence.new({
+                                ColorSequenceKeypoint.new(0, Library.Theme.AccentGradient),
+                                ColorSequenceKeypoint.new(1, Library.Theme.Accent)
+                            })
+                        end
                     end
                 })
 
@@ -3224,6 +3233,13 @@ end
                     Callback = function(Color)
                         Library.Theme.AccentGradient = Color
                         Library:ChangeTheme("AccentGradient", Color)
+                        -- Update header separator gradient (left side)
+                        if Items["HeaderSeparatorGradient"] then
+                            Items["HeaderSeparatorGradient"].Color = ColorSequence.new({
+                                ColorSequenceKeypoint.new(0, Library.Theme.AccentGradient),
+                                ColorSequenceKeypoint.new(1, Library.Theme.Accent)
+                            })
+                        end
                     end
                 })
 
