@@ -2305,33 +2305,34 @@ local Library do
 
                 Library:MakeBlurred(Items["LeftTabs"], Window)
 
--- ========== NEW HEADER SECTION (improved) ==========
+-- ========== IMPROVED HEADER SECTION ==========
 if Data.HeaderName or Data.HeaderIcon then
-    -- Increased header height to accommodate larger text
     Items["Header"] = Instances:Create("Frame", {
         Parent = Items["LeftTabs"].Instance,
         Name = "Header",
         BackgroundTransparency = 1,
-        Size = UDim2New(1, 0, 0, 85),   -- was 70
+        Size = UDim2New(1, 0, 0, 100),   -- increased height for larger elements
         LayoutOrder = 0,
         ZIndex = 2
     })
 
+    -- Icon (larger, crisp)
     if Data.HeaderIcon then
         Items["HeaderIcon"] = Instances:Create("ImageLabel", {
             Parent = Items["Header"].Instance,
             Name = "Icon",
             Image = "rbxassetid://" .. Data.HeaderIcon,
-            ScaleType = Enum.ScaleType.Fit,      -- prevents blurry scaling
+            ScaleType = Enum.ScaleType.Fit,
             BackgroundTransparency = 1,
-            Size = UDim2New(0, 36, 0, 36),       -- slightly larger
-            Position = UDim2New(0, 12, 0, 12),
-            AnchorPoint = Vector2New(0, 0),
+            Size = UDim2New(0, 48, 0, 48),   -- larger icon
+            Position = UDim2New(0, 12, 0.5, -24),  -- centered vertically
+            AnchorPoint = Vector2New(0, 0.5),
             ZIndex = 2
         })
         Items["HeaderIcon"]:AddToTheme({ImageColor3 = "Accent"})
     end
 
+    -- Title (much larger, bold, centered)
     if Data.HeaderName then
         Items["HeaderTitle"] = Instances:Create("TextLabel", {
             Parent = Items["Header"].Instance,
@@ -2340,33 +2341,38 @@ if Data.HeaderName or Data.HeaderIcon then
             Text = Data.HeaderName,
             TextColor3 = FromRGB(240, 240, 240),
             BackgroundTransparency = 1,
-            Size = UDim2New(1, -60, 0, 36),      -- taller to fit larger font
-            Position = UDim2New(0, 52, 0, 12),
-            TextXAlignment = Enum.TextXAlignment.Left,
-            TextSize = 24,                       -- larger
+            Size = UDim2New(1, -72, 0, 44),   -- wide enough, tall
+            Position = UDim2New(0, 60, 0.5, -22), -- center vertically
+            AnchorPoint = Vector2New(0, 0.5),
+            TextXAlignment = Enum.TextXAlignment.Left,  -- or Center if you prefer
+            TextYAlignment = Enum.TextYAlignment.Center,
+            TextSize = 28,                  -- large and bold
             TextScaled = false,
+            Font = Enum.Font.GothamBold,    -- force bold (overrides FontFace weight)
             ZIndex = 2
         })
         Items["HeaderTitle"]:AddToTheme({TextColor3 = "Text"})
     end
 
-    -- Improved separator: darker, rounded, with padding on sides
+    -- Separator line: darker, thicker, NO OUTLINE, rounded corners
     Items["HeaderSeparator"] = Instances:Create("Frame", {
         Parent = Items["Header"].Instance,
         Name = "Separator",
-        BackgroundColor3 = FromRGB(30, 30, 35),   -- darker than before
-        Size = UDim2New(1, -24, 0, 2),           -- thinner line, padded sides
-        Position = UDim2New(0, 12, 1, -10),
+        BackgroundColor3 = FromRGB(35, 35, 40),   -- matches dark UI, no blue tint
+        BackgroundTransparency = 0,
+        Size = UDim2New(1, -24, 0, 3),           -- thicker line
+        Position = UDim2New(0, 12, 1, -12),
         AnchorPoint = Vector2New(0, 1),
+        BorderSizePixel = 0,                     -- NO border
         ZIndex = 2
     })
-    -- Add rounded corners to the separator
+    -- Round the ends of the separator
     local sepCorner = Instance.new("UICorner")
-    sepCorner.CornerRadius = UDim.new(0, 2)       -- slightly rounded
+    sepCorner.CornerRadius = UDim.new(0, 4)       -- slightly rounded edges
     sepCorner.Parent = Items["HeaderSeparator"].Instance
 
-    -- No outline – we removed the UIStroke entirely
-    -- The separator uses only BackgroundColor3
+    -- Ensure no UIStroke or outline appears from theme
+    Items["HeaderSeparator"]:AddToTheme({BackgroundColor3 = "Background 2"}) -- blends with dark bg
 end
 -- =======================================
 
