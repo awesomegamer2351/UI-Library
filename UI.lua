@@ -2305,60 +2305,58 @@ local Library do
 
                 Library:MakeBlurred(Items["LeftTabs"], Window)
 
-                -- ========== NEW HEADER SECTION ==========
-                if Data.HeaderName or Data.HeaderIcon then
-                    Items["Header"] = Instances:Create("Frame", {
-                        Parent = Items["LeftTabs"].Instance,
-                        Name = "Header",
-                        BackgroundTransparency = 1,
-                        Size = UDim2New(1, 0, 0, 70),
-                        LayoutOrder = 0,
-                        ZIndex = 2
-                    })
+               -- ========== HEADER SECTION (final) ==========
+if Data.HeaderName then  -- icon removed
+    Items["Header"] = Instances:Create("Frame", {
+        Parent = Items["LeftTabs"].Instance,
+        Name = "Header",
+        BackgroundTransparency = 1,
+        Size = UDim2New(1, 0, 0, 70),   -- reduced height
+        LayoutOrder = 0,
+        ZIndex = 2
+    })
 
-                    if Data.HeaderIcon then
-                        Items["HeaderIcon"] = Instances:Create("ImageLabel", {
-                            Parent = Items["Header"].Instance,
-                            Name = "Icon",
-                            Image = "rbxassetid://" .. Data.HeaderIcon,
-                            BackgroundTransparency = 1,
-                            Size = UDim2New(0, 32, 0, 32),
-                            Position = UDim2New(0, 12, 0, 12),
-                            AnchorPoint = Vector2New(0, 0),
-                            ZIndex = 2
-                        })
-                        Items["HeaderIcon"]:AddToTheme({ImageColor3 = "Accent"})
-                    end
+    -- Title (smaller but still bold)
+    Items["HeaderTitle"] = Instances:Create("TextLabel", {
+        Parent = Items["Header"].Instance,
+        Name = "Title",
+        FontFace = Library.Font,
+        Text = Data.HeaderName,
+        TextColor3 = FromRGB(240, 240, 240),
+        BackgroundTransparency = 1,
+        Size = UDim2New(1, -24, 0, 32),   -- full width minus side padding
+        Position = UDim2New(0, 12, 0.5, -16), -- centered vertically
+        AnchorPoint = Vector2New(0, 0.5),
+        TextXAlignment = Enum.TextXAlignment.Left,
+        TextYAlignment = Enum.TextYAlignment.Center,
+        TextSize = 20,                   -- reasonable size
+        TextScaled = false,
+        Font = Enum.Font.GothamBold,     -- explicitly bold
+        ZIndex = 2
+    })
+    Items["HeaderTitle"]:AddToTheme({TextColor3 = "Text"})
 
-                    if Data.HeaderName then
-                        Items["HeaderTitle"] = Instances:Create("TextLabel", {
-                            Parent = Items["Header"].Instance,
-                            Name = "Title",
-                            FontFace = Library.Font,
-                            Text = Data.HeaderName,
-                            TextColor3 = FromRGB(240, 240, 240),
-                            BackgroundTransparency = 1,
-                            Size = UDim2New(1, -60, 0, 30),
-                            Position = UDim2New(0, 52, 0, 12),
-                            TextXAlignment = Enum.TextXAlignment.Left,
-                            TextSize = 20,
-                            ZIndex = 2
-                        })
-                        Items["HeaderTitle"]:AddToTheme({TextColor3 = "Text"})
-                    end
+    -- Separator: dark, semi‑transparent, rounded, closer to header
+    Items["HeaderSeparator"] = Instances:Create("Frame", {
+        Parent = Items["Header"].Instance,
+        Name = "Separator",
+        BackgroundColor3 = FromRGB(0, 0, 0),   -- base black, transparency will lighten
+        BackgroundTransparency = 0.65,         -- see‑through like UI backgrounds
+        Size = UDim2New(1, -24, 0, 2),
+        Position = UDim2New(0, 12, 1, -6),     -- closer (was -12, now -6)
+        AnchorPoint = Vector2New(0, 1),
+        BorderSizePixel = 0,
+        ZIndex = 2
+    })
+    -- Rounded ends
+    local sepCorner = Instance.new("UICorner")
+    sepCorner.CornerRadius = UDim.new(0, 4)
+    sepCorner.Parent = Items["HeaderSeparator"].Instance
 
-                    Items["HeaderSeparator"] = Instances:Create("Frame", {
-                        Parent = Items["Header"].Instance,
-                        Name = "Separator",
-                        BackgroundColor3 = FromRGB(45, 45, 50),
-                        Size = UDim2New(1, -24, 0, 1),
-                        Position = UDim2New(0, 12, 1, -6),
-                        AnchorPoint = Vector2New(0, 1),
-                        ZIndex = 2
-                    })
-                    Items["HeaderSeparator"]:AddToTheme({BackgroundColor3 = "Outline"})
-                end
-                -- =======================================
+    -- Use the UI's darkest theme color (Background) for the separator
+    Items["HeaderSeparator"]:AddToTheme({BackgroundColor3 = "Background"})
+end
+-- =======================================
 
                 local Gui = Items["MainFrame"].Instance
 
