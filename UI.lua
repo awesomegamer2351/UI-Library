@@ -2305,7 +2305,7 @@ local Library do
 
                 Library:MakeBlurred(Items["LeftTabs"], Window)
 
-            -- ========== HEADER SECTION (gradient separator, centered text) ==========
+          -- ========== HEADER SECTION (gradient separator with fade, centered text) ==========
 if Data.HeaderName then
     Items["Header"] = Instances:Create("Frame", {
         Parent = Items["LeftTabs"].Instance,
@@ -2334,12 +2334,12 @@ if Data.HeaderName then
     })
     Items["HeaderTitle"]:AddToTheme({TextColor3 = "Text"})
 
-    -- Separator: uses accent gradient, semi-transparent, rounded, no outline
+    -- Separator: uses accent gradient, fades at edges, constant thickness
     Items["HeaderSeparator"] = Instances:Create("Frame", {
         Parent = Items["Header"].Instance,
         Name = "Separator",
         BackgroundColor3 = FromRGB(255, 255, 255),
-        BackgroundTransparency = 0.6,               -- semi-transparent
+        BackgroundTransparency = 0,
         Size = UDim2New(1, -24, 0, 2),
         Position = UDim2New(0, 12, 1, -10),
         AnchorPoint = Vector2New(0, 1),
@@ -2347,11 +2347,19 @@ if Data.HeaderName then
         ZIndex = 2
     })
 
-    -- Gradient with accent colors (same as used everywhere else)
+    -- Gradient that fades at edges (transparent on ends, solid accent in middle)
     local sepGradient = Instance.new("UIGradient")
+    sepGradient.Transparency = NumberSequence.new({
+        NumberSequenceKeypoint.new(0, 1),      -- fully transparent at left edge
+        NumberSequenceKeypoint.new(0.2, 0),    -- starts becoming opaque
+        NumberSequenceKeypoint.new(0.5, 0),    -- fully opaque in middle
+        NumberSequenceKeypoint.new(0.8, 0),    -- starts fading
+        NumberSequenceKeypoint.new(1, 1)       -- fully transparent at right edge
+    })
+    -- Use the accent gradient colors (left to right)
     sepGradient.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0, Library.Theme.AccentGradient),  -- left: AccentGradient
-        ColorSequenceKeypoint.new(1, Library.Theme.Accent)           -- right: Accent
+        ColorSequenceKeypoint.new(0, Library.Theme.AccentGradient),
+        ColorSequenceKeypoint.new(1, Library.Theme.Accent)
     })
     sepGradient.Rotation = 0
     sepGradient.Parent = Items["HeaderSeparator"].Instance
