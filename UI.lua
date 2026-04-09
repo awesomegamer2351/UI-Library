@@ -2305,18 +2305,18 @@ local Library do
 
                 Library:MakeBlurred(Items["LeftTabs"], Window)
 
-                -- ========== HEADER SECTION (centered, lighter faded separator) ==========
+            -- ========== HEADER SECTION (gradient separator, centered text) ==========
 if Data.HeaderName then
     Items["Header"] = Instances:Create("Frame", {
         Parent = Items["LeftTabs"].Instance,
         Name = "Header",
         BackgroundTransparency = 1,
-        Size = UDim2New(1, 0, 0, 80),      -- a bit taller to allow perfect centering
+        Size = UDim2New(1, 0, 0, 70),
         LayoutOrder = 0,
         ZIndex = 2
     })
 
-    -- Title: perfectly centered in the Header frame
+    -- Title: perfectly centered vertically
     Items["HeaderTitle"] = Instances:Create("TextLabel", {
         Parent = Items["Header"].Instance,
         Name = "Title",
@@ -2324,43 +2324,42 @@ if Data.HeaderName then
         Text = Data.HeaderName,
         TextColor3 = FromRGB(240, 240, 240),
         BackgroundTransparency = 1,
-        Size = UDim2New(1, -24, 1, 0),     -- fill entire width minus padding, full height
-        Position = UDim2New(0, 12, 0, 0),  -- left padding only, Y centered by TextYAlignment
-        AnchorPoint = Vector2New(0, 0),
+        Size = UDim2New(1, -24, 1, 0),
+        Position = UDim2New(0, 12, 0, 0),
         TextXAlignment = Enum.TextXAlignment.Left,
-        TextYAlignment = Enum.TextYAlignment.Center,  -- auto centers vertically
+        TextYAlignment = Enum.TextYAlignment.Center,
         TextSize = 22,
-        TextScaled = false,
         Font = Enum.Font.GothamBold,
         ZIndex = 2
     })
     Items["HeaderTitle"]:AddToTheme({TextColor3 = "Text"})
 
-    -- Separator: lighter, transparent, with faded edges (gradient transparency)
+    -- Separator: uses accent gradient, semi-transparent, rounded, no outline
     Items["HeaderSeparator"] = Instances:Create("Frame", {
         Parent = Items["Header"].Instance,
         Name = "Separator",
-        BackgroundColor3 = FromRGB(255, 255, 255),   -- white base, will be tinted by theme
-        BackgroundTransparency = 0.85,               -- very see‑through
+        BackgroundColor3 = FromRGB(255, 255, 255),
+        BackgroundTransparency = 0.6,               -- semi-transparent
         Size = UDim2New(1, -24, 0, 2),
-        Position = UDim2New(0, 12, 1, -8),           -- 8px above the bottom of header
+        Position = UDim2New(0, 12, 1, -10),
         AnchorPoint = Vector2New(0, 1),
         BorderSizePixel = 0,
         ZIndex = 2
     })
-    -- Add a gradient that fades the ends to transparent (creates "faded edges")
+
+    -- Gradient with accent colors (same as used everywhere else)
     local sepGradient = Instance.new("UIGradient")
-    sepGradient.Transparency = NumberSequence.new({
-        NumberSequenceKeypoint.new(0, 1),      -- fully transparent at left edge
-        NumberSequenceKeypoint.new(0.15, 0),   -- opaque at 15%
-        NumberSequenceKeypoint.new(0.85, 0),   -- opaque until 85%
-        NumberSequenceKeypoint.new(1, 1)       -- transparent at right edge
+    sepGradient.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Library.Theme.AccentGradient),  -- left: AccentGradient
+        ColorSequenceKeypoint.new(1, Library.Theme.Accent)           -- right: Accent
     })
     sepGradient.Rotation = 0
     sepGradient.Parent = Items["HeaderSeparator"].Instance
 
-    -- Apply a light theme color (e.g., "Outline" or "Text" with low opacity)
-    Items["HeaderSeparator"]:AddToTheme({BackgroundColor3 = "Outline"})
+    -- Rounded corners
+    local sepCorner = Instance.new("UICorner")
+    sepCorner.CornerRadius = UDim.new(0, 4)
+    sepCorner.Parent = Items["HeaderSeparator"].Instance
 end
 -- =======================================
 												
