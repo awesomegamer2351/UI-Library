@@ -2305,60 +2305,70 @@ local Library do
 
                 Library:MakeBlurred(Items["LeftTabs"], Window)
 
-                -- ========== NEW HEADER SECTION ==========
-                if Data.HeaderName or Data.HeaderIcon then
-                    Items["Header"] = Instances:Create("Frame", {
-                        Parent = Items["LeftTabs"].Instance,
-                        Name = "Header",
-                        BackgroundTransparency = 1,
-                        Size = UDim2New(1, 0, 0, 70),
-                        LayoutOrder = 0,
-                        ZIndex = 2
-                    })
+-- ========== NEW HEADER SECTION (improved) ==========
+if Data.HeaderName or Data.HeaderIcon then
+    -- Increased header height to accommodate larger text
+    Items["Header"] = Instances:Create("Frame", {
+        Parent = Items["LeftTabs"].Instance,
+        Name = "Header",
+        BackgroundTransparency = 1,
+        Size = UDim2New(1, 0, 0, 85),   -- was 70
+        LayoutOrder = 0,
+        ZIndex = 2
+    })
 
-                    if Data.HeaderIcon then
-                        Items["HeaderIcon"] = Instances:Create("ImageLabel", {
-                            Parent = Items["Header"].Instance,
-                            Name = "Icon",
-                            Image = "rbxassetid://" .. Data.HeaderIcon,
-                            BackgroundTransparency = 1,
-                            Size = UDim2New(0, 32, 0, 32),
-                            Position = UDim2New(0, 12, 0, 12),
-                            AnchorPoint = Vector2New(0, 0),
-                            ZIndex = 2
-                        })
-                        Items["HeaderIcon"]:AddToTheme({ImageColor3 = "Accent"})
-                    end
+    if Data.HeaderIcon then
+        Items["HeaderIcon"] = Instances:Create("ImageLabel", {
+            Parent = Items["Header"].Instance,
+            Name = "Icon",
+            Image = "rbxassetid://" .. Data.HeaderIcon,
+            ScaleType = Enum.ScaleType.Fit,      -- prevents blurry scaling
+            BackgroundTransparency = 1,
+            Size = UDim2New(0, 36, 0, 36),       -- slightly larger
+            Position = UDim2New(0, 12, 0, 12),
+            AnchorPoint = Vector2New(0, 0),
+            ZIndex = 2
+        })
+        Items["HeaderIcon"]:AddToTheme({ImageColor3 = "Accent"})
+    end
 
-                    if Data.HeaderName then
-                        Items["HeaderTitle"] = Instances:Create("TextLabel", {
-                            Parent = Items["Header"].Instance,
-                            Name = "Title",
-                            FontFace = Library.Font,
-                            Text = Data.HeaderName,
-                            TextColor3 = FromRGB(240, 240, 240),
-                            BackgroundTransparency = 1,
-                            Size = UDim2New(1, -60, 0, 30),
-                            Position = UDim2New(0, 52, 0, 12),
-                            TextXAlignment = Enum.TextXAlignment.Left,
-                            TextSize = 20,
-                            ZIndex = 2
-                        })
-                        Items["HeaderTitle"]:AddToTheme({TextColor3 = "Text"})
-                    end
+    if Data.HeaderName then
+        Items["HeaderTitle"] = Instances:Create("TextLabel", {
+            Parent = Items["Header"].Instance,
+            Name = "Title",
+            FontFace = Library.Font,
+            Text = Data.HeaderName,
+            TextColor3 = FromRGB(240, 240, 240),
+            BackgroundTransparency = 1,
+            Size = UDim2New(1, -60, 0, 36),      -- taller to fit larger font
+            Position = UDim2New(0, 52, 0, 12),
+            TextXAlignment = Enum.TextXAlignment.Left,
+            TextSize = 24,                       -- larger
+            TextScaled = false,
+            ZIndex = 2
+        })
+        Items["HeaderTitle"]:AddToTheme({TextColor3 = "Text"})
+    end
 
-                    Items["HeaderSeparator"] = Instances:Create("Frame", {
-                        Parent = Items["Header"].Instance,
-                        Name = "Separator",
-                        BackgroundColor3 = FromRGB(45, 45, 50),
-                        Size = UDim2New(1, -24, 0, 1),
-                        Position = UDim2New(0, 12, 1, -6),
-                        AnchorPoint = Vector2New(0, 1),
-                        ZIndex = 2
-                    })
-                    Items["HeaderSeparator"]:AddToTheme({BackgroundColor3 = "Outline"})
-                end
-                -- =======================================
+    -- Improved separator: darker, rounded, with padding on sides
+    Items["HeaderSeparator"] = Instances:Create("Frame", {
+        Parent = Items["Header"].Instance,
+        Name = "Separator",
+        BackgroundColor3 = FromRGB(30, 30, 35),   -- darker than before
+        Size = UDim2New(1, -24, 0, 2),           -- thinner line, padded sides
+        Position = UDim2New(0, 12, 1, -10),
+        AnchorPoint = Vector2New(0, 1),
+        ZIndex = 2
+    })
+    -- Add rounded corners to the separator
+    local sepCorner = Instance.new("UICorner")
+    sepCorner.CornerRadius = UDim.new(0, 2)       -- slightly rounded
+    sepCorner.Parent = Items["HeaderSeparator"].Instance
+
+    -- No outline – we removed the UIStroke entirely
+    -- The separator uses only BackgroundColor3
+end
+-- =======================================
 
                 local Gui = Items["MainFrame"].Instance
 
