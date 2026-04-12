@@ -76,7 +76,6 @@ local Library do
             Assets = "lyapossss/Assets",
         },
 
-        -- Ignore below
         Pages = { },
         Sections = { },
 
@@ -318,58 +317,34 @@ local Library do
 
         Instances.FadeItem = function(self, Visibility, Speed)
             local Item = self.Instance
-
-            if Visibility == true then 
-                Item.Visible = true
-            end
-
+            if Visibility == true then Item.Visible = true end
             local Descendants = Item:GetDescendants()
             TableInsert(Descendants, Item)
-
-            local NewTween
-
             for Index, Value in Descendants do 
                 local TransparencyProperty = Tween:GetProperty(Value)
-
-                if not TransparencyProperty then 
-                    continue
-                end
-
+                if not TransparencyProperty then continue end
                 if type(TransparencyProperty) == "table" then 
                     for _, Property in TransparencyProperty do 
-                        NewTween = Tween:FadeItem(Value, Property, not Visibility, Speed)
+                        Tween:FadeItem(Value, Property, not Visibility, Speed)
                     end
                 else
-                    NewTween = Tween:FadeItem(Value, TransparencyProperty, not Visibility, Speed)
+                    Tween:FadeItem(Value, TransparencyProperty, not Visibility, Speed)
                 end
             end
         end
 
         Instances.AddToTheme = function(self, Properties)
-            if not self.Instance then 
-                return
-            end
-
+            if not self.Instance then return end
             Library:AddToTheme(self, Properties)
         end
 
         Instances.ChangeItemTheme = function(self, Properties)
-            if not self.Instance then 
-                return
-            end
-
+            if not self.Instance then return end
             Library:ChangeItemTheme(self, Properties)
         end
 
         Instances.Connect = function(self, Event, Callback, Name)
-            if not self.Instance then 
-                return
-            end
-
-            if not self.Instance[Event] then 
-                return
-            end
-
+            if not self.Instance or not self.Instance[Event] then return end
             if IsMobile then
                 if Event == "MouseButton1Down" or Event == "MouseButton1Click" then 
                     Event = "TouchTap"
@@ -377,71 +352,48 @@ local Library do
                     Event = "TouchLongPress"
                 end
             end
-
             return Library:Connect(self.Instance[Event], Callback, Name)
         end
 
         Instances.Tween = function(self, Info, Goal)
-            if not self.Instance then 
-                return
-            end
-
+            if not self.Instance then return end
             return Tween:Create(self, Info, Goal)
         end
 
         Instances.Disconnect = function(self, Name)
-            if not self.Instance then 
-                return
-            end
-
+            if not self.Instance then return end
             return Library:Disconnect(Name)
         end
 
         Instances.Clean = function(self)
-            if not self.Instance then 
-                return
-            end
-
+            if not self.Instance then return end
             self.Instance:Destroy()
             self = nil
         end
 
         Instances.MakeDraggable = function(self)
-            if not self.Instance then 
-                return
-            end
-        
+            if not self.Instance then return end
             local Gui = self.Instance
             local Dragging = false 
             local DragStart
             local StartPosition 
-        
             local Set = function(Input)
                 local DragDelta = Input.Position - DragStart
                 local NewX = StartPosition.X.Offset + DragDelta.X
                 local NewY = StartPosition.Y.Offset + DragDelta.Y
-
                 local ScreenSize = Gui.Parent.AbsoluteSize
                 local GuiSize = Gui.AbsoluteSize
-        
                 NewX = MathClamp(NewX, 0, ScreenSize.X - GuiSize.X)
                 NewY = MathClamp(NewY, 0, ScreenSize.Y - GuiSize.Y)
-        
                 self:Tween(TweenInfo.new(0.35, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Position = UDim2New(0, NewX, 0, NewY)})
             end
-        
             local InputChanged
-        
             self:Connect("InputBegan", function(Input)
                 if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
                     Dragging = true
                     DragStart = Input.Position
                     StartPosition = Gui.Position
-        
-                    if InputChanged then 
-                        return
-                    end
-        
+                    if InputChanged then return end
                     InputChanged = Input.Changed:Connect(function()
                         if Input.UserInputState == Enum.UserInputState.End then
                             Dragging = false
@@ -451,34 +403,23 @@ local Library do
                     end)
                 end
             end)
-        
             Library:Connect(UserInputService.InputChanged, function(Input)
                 if Input.UserInputType == Enum.UserInputType.MouseMovement or Input.UserInputType == Enum.UserInputType.Touch then
-                    if Dragging then
-                        Set(Input)
-                    end
+                    if Dragging then Set(Input) end
                 end
             end)
-        
             return Dragging
         end
 
         Instances.MakeResizeable = function(self, Minimum, Maximum, Window)
-            if not self.Instance then 
-                return
-            end
-
+            if not self.Instance then return end
             local Gui = self.Instance
-
             local Resizing = false 
             local CurrentSide = nil
-
             local StartMouse = nil 
             local StartPosition = nil 
             local StartSize = nil
-            
             local EdgeThickness = 2
-
             local MakeEdge = function(Name, Position, Size)
                 local Button = Instances:Create("TextButton", {
                     Name = "\0",
@@ -492,62 +433,31 @@ local Library do
                     Parent = Gui,
                     ZIndex = 99999,
                 })  Button:AddToTheme({BackgroundColor3 = "Accent"})
-
                 return Button
             end
-
             local Edges = {
-                {Button = MakeEdge(
-                    "Left", 
-                    UDim2New(0, 0, 0, 0), 
-                    UDim2New(0, EdgeThickness, 1, 0)), 
-                    Side = "L"
-                },
-
-                {Button = MakeEdge(
-                    "Right", 
-                    UDim2New(1, -EdgeThickness, 0, 0), 
-                    UDim2New(0, EdgeThickness, 1, 0)), 
-                    Side = "R"
-                },
-
-                {Button = MakeEdge(
-                    "Top", UDim2New(0, 0, 0, 0), 
-                    UDim2New(1, 0, 0, EdgeThickness)), 
-                    Side = "T"
-                },
-
-                {Button = MakeEdge(
-                    "Bottom", 
-                    UDim2New(0, 0, 1, -EdgeThickness), 
-                    UDim2New(1, 0, 0, EdgeThickness)), 
-                    Side = "B"
-                },
+                {Button = MakeEdge("Left", UDim2New(0, 0, 0, 0), UDim2New(0, EdgeThickness, 1, 0)), Side = "L"},
+                {Button = MakeEdge("Right", UDim2New(1, -EdgeThickness, 0, 0), UDim2New(0, EdgeThickness, 1, 0)), Side = "R"},
+                {Button = MakeEdge("Top", UDim2New(0, 0, 0, 0), UDim2New(1, 0, 0, EdgeThickness)), Side = "T"},
+                {Button = MakeEdge("Bottom", UDim2New(0, 0, 1, -EdgeThickness), UDim2New(1, 0, 0, EdgeThickness)), Side = "B"},
             }
-
             local BeginResizing = function(Side)
                 Resizing = true 
                 CurrentSide = Side 
-
                 StartMouse = UserInputService:GetMouseLocation()
-
                 StartPosition = Vector2New(Gui.Position.X.Offset, Gui.Position.Y.Offset)
                 StartSize = Vector2New(Gui.Size.X.Offset, Gui.Size.Y.Offset)
-                
                 for Index, Value in Edges do 
                     Value.Button:Tween(nil, {BackgroundTransparency = (Value.Side == Side) and 0 or 1})
                 end
             end
-
             local EndResizing = function()
                 Resizing = false 
                 CurrentSide = nil
-
                 for Index, Value in Edges do 
                     Value.Button.Instance.BackgroundTransparency = 1
                 end
             end
-
             for Index, Value in Edges do 
                 Value.Button:Connect("InputBegan", function(Input)
                     if Input.UserInputType == Enum.UserInputType.MouseButton1 then
@@ -555,86 +465,49 @@ local Library do
                     end
                 end)
             end
-
             Library:Connect(UserInputService.InputEnded, function(Input)
                 if Input.UserInputType == Enum.UserInputType.MouseButton1 then
-                    if Resizing then
-                        EndResizing()
-                    end
+                    if Resizing then EndResizing() end
                 end
             end)
-
             Library:Connect(RunService.RenderStepped, function()
-                if not Resizing or not CurrentSide then 
-                    return 
-                end
-
+                if not Resizing or not CurrentSide then return end
                 local MouseLocation = UserInputService:GetMouseLocation()
                 local dx = MouseLocation.X - StartMouse.X
                 local dy = MouseLocation.Y - StartMouse.Y
-            
                 local x, y = StartPosition.X, StartPosition.Y
                 local w, h = StartSize.X, StartSize.Y
-
                 if CurrentSide == "L" then
                     x = StartPosition.X + dx
                     w = StartSize.X - dx
-
-                    if Window then
-                        Window.Left.Y = h
-                    end
                 elseif CurrentSide == "R" then
                     w = StartSize.X + dx
-
-                    if Window then
-                        Window.Right.Y = h
-                    end
                 elseif CurrentSide == "T" then
                     y = StartPosition.Y + dy
                     h = StartSize.Y - dy
-
-                    if Window then
-                        Window.Top.X = w
-                    end
                 elseif CurrentSide == "B" then
                     h = StartSize.Y + dy
-
-                    if Window then
-                        Window.Bottom.X = w
-                    end
                 end
-            
                 if w < Minimum.X then
-                    if CurrentSide == "L" then
-                        x = x - (Minimum.X - w)
-                    end
+                    if CurrentSide == "L" then x = x - (Minimum.X - w) end
                     w = Minimum.X
                 end
                 if h < Minimum.Y then
-                    if CurrentSide == "T" then
-                        y = y - (Minimum.Y - h)
-                    end
+                    if CurrentSide == "T" then y = y - (Minimum.Y - h) end
                     h = Minimum.Y
                 end
-            
                 self:Tween(TweenInfo.new(0.35, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Position = UDim2FromOffset(x, y)})
                 self:Tween(TweenInfo.new(0.35, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Size = UDim2FromOffset(w, h)})
             end)
         end
 
         Instances.OnHover = function(self, Function)
-            if not self.Instance then 
-                return
-            end
-            
+            if not self.Instance then return end
             return Library:Connect(self.Instance.MouseEnter, Function)
         end
 
         Instances.OnHoverLeave = function(self, Function)
-            if not self.Instance then 
-                return
-            end
-            
+            if not self.Instance then return end
             return Library:Connect(self.Instance.MouseLeave, Function)
         end
     end
@@ -2645,10 +2518,6 @@ end
                     BackgroundColor3 = FromRGB(255, 255, 255)
                 })  Items["CloseIcon"]:AddToTheme({ImageColor3 = "Text"})        
                 
-                Items["CloseButton"]:Connect("MouseButton1Down", function()
-                    Library:Unload()
-                end)
-
                 Items["CloseIconAccent"] = Instances:Create("Frame", {
                     Parent = Items["CloseButton"].Instance,
                     Name = "\0",
@@ -2667,6 +2536,179 @@ end
                     Name = "\0",
                     CornerRadius = UDimNew(0, 7)
                 })
+
+                -- ========== CONFIRMATION MODAL ==========
+                Items["ConfirmModal"] = Instances:Create("Frame", {
+                    Parent = Library.UnusedHolder.Instance,
+                    Name = "ConfirmModal",
+                    BackgroundColor3 = FromRGB(0,0,0),
+                    BackgroundTransparency = 0.6,
+                    Size = UDim2New(1,0,1,0),
+                    ZIndex = 1000,
+                    Visible = false,
+                    BorderSizePixel = 0
+                })
+
+                -- Modal content frame
+                local ModalFrame = Instances:Create("Frame", {
+                    Parent = Items["ConfirmModal"].Instance,
+                    Name = "ModalFrame",
+                    BackgroundColor3 = FromRGB(21,21,24),
+                    BackgroundTransparency = 0,
+                    Size = UDim2New(0,350,0,200),
+                    Position = UDim2New(0.5,-175,0.5,-100),
+                    AnchorPoint = Vector2New(0,0),
+                    ZIndex = 1001,
+                    BorderSizePixel = 0
+                })
+                Instances:Create("UICorner", {Parent = ModalFrame.Instance, CornerRadius = UDim.new(0,8)})
+
+                -- Modal Title
+                local ModalTitle = Instances:Create("TextLabel", {
+                    Parent = ModalFrame.Instance,
+                    FontFace = Library.Font,
+                    Text = "Are you sure?",
+                    TextColor3 = FromRGB(240,240,240),
+                    BackgroundTransparency = 1,
+                    Size = UDim2New(1,0,0,40),
+                    Position = UDim2New(0,0,0,20),
+                    TextSize = 22,
+                    Font = Enum.Font.GothamBold,
+                    TextXAlignment = Enum.TextXAlignment.Center
+                }) :AddToTheme({TextColor3 = "Text"})
+
+                -- Modal Description
+                local ModalDesc = Instances:Create("TextLabel", {
+                    Parent = ModalFrame.Instance,
+                    FontFace = Library.Font,
+                    Text = "The menu will be unloaded.\nAll unsaved settings will be lost.",
+                    TextColor3 = FromRGB(200,200,200),
+                    BackgroundTransparency = 1,
+                    Size = UDim2New(1,0,0,50),
+                    Position = UDim2New(0,0,0,70),
+                    TextSize = 14,
+                    TextXAlignment = Enum.TextXAlignment.Center,
+                    TextYAlignment = Enum.TextYAlignment.Top
+                }) :AddToTheme({TextColor3 = "Text"})
+
+                -- Cancel button
+                local CancelBtn = Instances:Create("TextButton", {
+                    Parent = ModalFrame.Instance,
+                    Name = "CancelBtn",
+                    Text = "",
+                    AutoButtonColor = false,
+                    Size = UDim2New(0,130,0,35),
+                    Position = UDim2New(0,30,1,-50),
+                    AnchorPoint = Vector2New(0,1),
+                    ZIndex = 1002,
+                    BackgroundColor3 = FromRGB(27,26,29)
+                }) :AddToTheme({BackgroundColor3 = "Element"})
+                Instances:Create("UICorner", {Parent = CancelBtn.Instance, CornerRadius = UDim.new(0,6)})
+
+                local CancelAccent = Instances:Create("Frame", {
+                    Parent = CancelBtn.Instance,
+                    Size = UDim2New(0,0,0,0),
+                    AnchorPoint = Vector2New(0.5,0.5),
+                    Position = UDim2New(0.5,0,0.5,0),
+                    BackgroundTransparency = 1,
+                    ZIndex = 1003
+                })
+                Instances:Create("UICorner", {Parent = CancelAccent.Instance, CornerRadius = UDim.new(0,6)})
+                Instances:Create("UIGradient", {Parent = CancelAccent.Instance, Rotation = -115, Color = RGBSequence{RGBSequenceKeypoint(0,FromRGB(255,255,255)), RGBSequenceKeypoint(1,FromRGB(143,143,143))}}):AddToTheme({Color = function() return RGBSequence{RGBSequenceKeypoint(0,Library.Theme.Accent), RGBSequenceKeypoint(1,Library.Theme.AccentGradient)} end})
+
+                local CancelText = Instances:Create("TextLabel", {
+                    Parent = CancelBtn.Instance,
+                    FontFace = Library.Font,
+                    Text = "Cancel",
+                    TextColor3 = FromRGB(240,240,240),
+                    BackgroundTransparency = 1,
+                    Size = UDim2New(1,0,1,0),
+                    TextSize = 14,
+                    TextYAlignment = Enum.TextYAlignment.Center
+                }) :AddToTheme({TextColor3 = "Text"})
+
+                CancelBtn.OnHover(function() CancelAccent:Tween(TweenInfo.new(0.2), {Size = UDim2New(1,0,1,0), BackgroundTransparency = 0}) end)
+                CancelBtn.OnHoverLeave(function() CancelAccent:Tween(TweenInfo.new(0.2), {Size = UDim2New(0,0,0,0), BackgroundTransparency = 1}) end)
+
+                -- Confirm button
+                local ConfirmBtn = Instances:Create("TextButton", {
+                    Parent = ModalFrame.Instance,
+                    Name = "ConfirmBtn",
+                    Text = "",
+                    AutoButtonColor = false,
+                    Size = UDim2New(0,130,0,35),
+                    Position = UDim2New(1,-160,1,-50),
+                    AnchorPoint = Vector2New(1,1),
+                    ZIndex = 1002,
+                    BackgroundColor3 = FromRGB(27,26,29)
+                }) :AddToTheme({BackgroundColor3 = "Element"})
+                Instances:Create("UICorner", {Parent = ConfirmBtn.Instance, CornerRadius = UDim.new(0,6)})
+
+                local ConfirmAccent = Instances:Create("Frame", {
+                    Parent = ConfirmBtn.Instance,
+                    Size = UDim2New(0,0,0,0),
+                    AnchorPoint = Vector2New(0.5,0.5),
+                    Position = UDim2New(0.5,0,0.5,0),
+                    BackgroundTransparency = 1,
+                    ZIndex = 1003
+                })
+                Instances:Create("UICorner", {Parent = ConfirmAccent.Instance, CornerRadius = UDim.new(0,6)})
+                Instances:Create("UIGradient", {Parent = ConfirmAccent.Instance, Rotation = -115, Color = RGBSequence{RGBSequenceKeypoint(0,FromRGB(255,255,255)), RGBSequenceKeypoint(1,FromRGB(143,143,143))}}):AddToTheme({Color = function() return RGBSequence{RGBSequenceKeypoint(0,Library.Theme.Accent), RGBSequenceKeypoint(1,Library.Theme.AccentGradient)} end})
+
+                local ConfirmText = Instances:Create("TextLabel", {
+                    Parent = ConfirmBtn.Instance,
+                    FontFace = Library.Font,
+                    Text = "Confirm",
+                    TextColor3 = FromRGB(240,240,240),
+                    BackgroundTransparency = 1,
+                    Size = UDim2New(1,0,1,0),
+                    TextSize = 14,
+                    TextYAlignment = Enum.TextYAlignment.Center
+                }) :AddToTheme({TextColor3 = "Text"})
+
+                ConfirmBtn.OnHover(function() ConfirmAccent:Tween(TweenInfo.new(0.2), {Size = UDim2New(1,0,1,0), BackgroundTransparency = 0}) end)
+                ConfirmBtn.OnHoverLeave(function() ConfirmAccent:Tween(TweenInfo.new(0.2), {Size = UDim2New(0,0,0,0), BackgroundTransparency = 1}) end)
+
+                -- Modal show/hide function
+                local function ShowModal(show)
+                    if show then
+                        Items["ConfirmModal"].Instance.Parent = Library.Holder.Instance
+                        Items["ConfirmModal"].Instance.Visible = true
+                        local descendants = Items["ConfirmModal"].Instance:GetDescendants()
+                        TableInsert(descendants, Items["ConfirmModal"].Instance)
+                        for _, v in descendants do
+                            local tp = Tween:GetProperty(v)
+                            if not tp then continue end
+                            if not v.ClassName:find("UI") then v.ZIndex = 1001 end
+                            if type(tp) == "table" then for _, p in tp do Tween:FadeItem(v, p, true, 0.2) end else Tween:FadeItem(v, tp, true, 0.2) end
+                        end
+                    else
+                        local descendants = Items["ConfirmModal"].Instance:GetDescendants()
+                        TableInsert(descendants, Items["ConfirmModal"].Instance)
+                        for _, v in descendants do
+                            local tp = Tween:GetProperty(v)
+                            if not tp then continue end
+                            if type(tp) == "table" then for _, p in tp do Tween:FadeItem(v, p, false, 0.2) end else Tween:FadeItem(v, tp, false, 0.2) end
+                        end
+                        task.wait(0.2)
+                        Items["ConfirmModal"].Instance.Visible = false
+                        Items["ConfirmModal"].Instance.Parent = Library.UnusedHolder.Instance
+                    end
+                end
+
+                -- Button connections
+                CancelBtn:Connect("MouseButton1Down", function() ShowModal(false) end)
+                ConfirmBtn:Connect("MouseButton1Down", function()
+                    ShowModal(false)
+                    task.wait(0.1)
+                    Library:Unload()
+                end)
+
+                -- Replace the original close button connection
+                Items["CloseButton"]:Connect("MouseButton1Down", function()
+                    ShowModal(true)
+                end)
+                -- =======================================
 
                 Instances:Create("UICorner", {
                     Parent = Items["MainFrame"].Instance,
@@ -3218,7 +3260,6 @@ end
                     Callback = function(Color)
                         Library.Theme.Accent = Color
                         Library:ChangeTheme("Accent", Color)
-                        -- Update header separator gradient (right side)
                         if Items["HeaderSeparatorGradient"] then
                             Items["HeaderSeparatorGradient"].Color = ColorSequence.new({
                                 ColorSequenceKeypoint.new(0, Library.Theme.AccentGradient),
@@ -3234,7 +3275,6 @@ end
                     Callback = function(Color)
                         Library.Theme.AccentGradient = Color
                         Library:ChangeTheme("AccentGradient", Color)
-                        -- Update header separator gradient (left side)
                         if Items["HeaderSeparatorGradient"] then
                             Items["HeaderSeparatorGradient"].Color = ColorSequence.new({
                                 ColorSequenceKeypoint.new(0, Library.Theme.AccentGradient),
